@@ -5,7 +5,6 @@ module "oracle_base_db" {
     root_compartment_id             = var.root_compartment_id
     private_subnet_id               = module.subnets.private_subnet_id
 
-
     db_system_shape                 = var.db_system_shape
     db_cpu_core_count               = var.db_cpu_core_count
     db_admin_password               = var.db_admin_password
@@ -15,7 +14,6 @@ module "oracle_base_db" {
     database_edition                = var.database_edition
     license_model                   = var.license_model
     db_system_node_count            = var.db_system_node_count
-    db_domain                       = module.subnets.subnet_domain_name
     db_storage_management           = var.db_storage_management
     db_ad                           = var.db_ad
 }

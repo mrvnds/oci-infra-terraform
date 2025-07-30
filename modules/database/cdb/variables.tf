@@ -2,7 +2,6 @@ variable "env_name" {}
 variable "compartment_id" {}
 variable "root_compartment_id" {}
 variable "private_subnet_id" {}
-variable "db_domain" {}
 
 
 variable "db_system_shape" {}

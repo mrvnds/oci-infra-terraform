@@ -9,7 +9,7 @@ resource "oci_containerengine_node_pool" "oke_nodepool" {
       availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
       subnet_id           = var.private_subnet_id
     }
-    size = 6
+    size = var.node_size
     node_pool_pod_network_option_details {
     cni_type = "OCI_VCN_IP_NATIVE"
     pod_subnet_ids = [var.private_subnet_id]

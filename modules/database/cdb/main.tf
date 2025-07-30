@@ -25,7 +25,6 @@ resource "oci_database_db_system" "oracle_base_db" {
     database {
       admin_password = var.db_admin_password
       db_name        = "${var.env_name}cdb"
-      db_domain      = "${var.env_name}cdb.${var.db_domain}"
       tde_wallet_password = var.db_admin_password
 
       db_backup_config {

@@ -19,6 +19,17 @@ variable "vcn_cidr" {
   description = "CIDR block for the VCN"
   type        = string
 }
+# variable "vcn_id" {
+#   description = "OCID of the VCN, OCID of the VCN if already created"
+#   type        = string
+#   #default     = module.vcn.vcn_id
+# }
+
+# variable "public_subnet_id" {
+#   description = "OCID of the public subnet"
+#   type        = string
+#   #default     = module.subnets.public_subnet_id
+# }
 
 variable "public_subnet_cidr" {
   description = "CIDR block for the public subnet"
@@ -29,6 +40,12 @@ variable "lb_subnet_cidr" {
   type        = string
 }
 
+# variable "private_subnet_id" {
+#   description = "OCID of the private subnet"
+#   type        = string
+#   #default     = module.subnets.private_subnet_id
+# }
+
 variable "private_subnet_cidr" {
   description = "CIDR block for the private subnet"
   type        = string
@@ -38,6 +55,12 @@ variable "availability_domain" {
   description = "availability domain"
   type        = string
 }
+
+# variable "lb_subnet_id" {
+#   description = "OCID of the load balancer subnet"
+#   type        = string
+#   #default     = "module.subnets.lb_subnet_cidr"
+# }
 
 # public compute configuration
 variable "public_bastion_os_version" {
@@ -108,7 +131,31 @@ variable "k8s_version" {
   description = "Kubernetes version to use for OKE cluster"
   type        = string
   default     = "v1.31.1"
-  
+}
+# variable "oke_cluster_id" {
+#   description = "OCID of the OKE cluster"
+#   type        = string
+#   #default     = module.oke_cluster.oke_cluster_id
+# }
+variable "type" {
+  description = "Type of OKE cluster, either 'ENHANCED_CLUSTER' or 'STANDARD_CLUSTER'"
+  type        = string
+  default     = "ENHANCED_CLUSTER"
+}
+variable "cni_type" {
+    description = "CNI type for the OKE cluster, either 'VCN_IP_NATIVE' or 'VCN_IP_FLEXIBLE'"
+    type        = string
+    default     = "OCI_VCN_IP_NATIVE"
+}
+variable "node_os_version" {
+  description = "Operating system version for OKE nodes"
+  type        = string
+  default     = "8"
+}
+variable "node_size" {
+  description = "Number of nodes in the OKE node pool"
+  type        = number
+  default     = 6
 }
 variable "node_shape" {
   description = "Shape for OKE nodes"
@@ -187,6 +234,16 @@ variable "db_ad" {
   type        = number
   default     = 0
 }
+# variable "db_domain" {
+#   description = "Domain name for the Oracle Database system"
+#   type        = string
+#   #default     = module.subnets.subnet_domain_name 
+# }
+# variable "cdb_id" {
+#   description = "OCID of the CDB"
+#   type        = string
+#   #default     = module.oracle_base_db.cdb_id
+# }
 
 
 # pdb configuration
@@ -199,14 +256,12 @@ variable "pdb_names" {
 variable "pdb_admin_password" {
   description = "Admin password for PDBs"
   type        = string
-  default = "SaaS-Ops_01"
   sensitive   = true
 }
 
 variable "tde_wallet_password" {
   description = "TDE wallet password for PDBs"
   type        = string
-  default = "SaaS-Ops_01"
   sensitive   = true
 }
 
@@ -223,3 +278,9 @@ variable "export_name" {
     stap = "/stap-export"
   }
 }
+
+# variable "mount_target_id" {
+#   description = "OCID of the mount target"
+#   type        = string
+#   #default     = module.mount_target.mount_target_id
+# }
