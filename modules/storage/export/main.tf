@@ -10,14 +10,14 @@ resource "oci_file_storage_file_system" "file_system" {
     
     availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
     compartment_id = var.compartment_id
-    display_name = "${each.key}-fs"
+    display_name = "${var.env_name}-${each.key}-fs"
 }
 resource "oci_file_storage_export" "export" {
     for_each = var.export_name
 
     export_set_id = oci_file_storage_export_set.export_set[each.key].id
     file_system_id = oci_file_storage_file_system.file_system[each.key].id
-    path = each.value
+    path = "/${var.env_name}-${each.value}"
 
 
     export_options {

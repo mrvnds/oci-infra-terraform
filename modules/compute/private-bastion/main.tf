@@ -39,14 +39,31 @@ resource "tls_private_key" "bastion_key" {
 
 resource "local_file" "bastion_private_key" {
   content              = tls_private_key.bastion_key.private_key_pem
-  filename             = "../../environment/${var.env_name}/ssh-keys/private-bastion-key.pem"
+  filename             = "../../private-bastion-key.pem"
   file_permission      = "0600"
   directory_permission = "0700"
 }
 
 resource "local_file" "bastion_public_key" {
   content              = tls_private_key.bastion_key.public_key_openssh
-  filename             = "../../environment/${var.env_name}/ssh-keys/private-bastion-key.pub"
+  filename             = "../../private-bastion-key.pub"
   file_permission      = "0644"
   directory_permission = "0700"
 }
+
+# resource "null_resource" "upload_public_key" {
+#   triggers = {
+#     env_name      = var.env_name
+#     bucket_name   = "${var.env_name}-ssh-keys-bucket"
+#     namespace     = data.oci_objectstorage_namespace.ns.namespace
+#   }
+
+#   provisioner "local-exec" {
+#     command = "oci os object put --bucket-name ${self.triggers.bucket_name} --file private-bastion-key.pem --name ${self.triggers.env_name}-private-bastion-key.pem --namespace ${self.triggers.namespace}"
+#   }
+
+#   provisioner "local-exec" {
+#     when    = destroy
+#     command = "oci os object delete --bucket-name ${self.triggers.bucket_name} --name ${self.triggers.env_name}-private-bastion-key.pem --namespace ${self.triggers.namespace} --force"
+#   }
+# }

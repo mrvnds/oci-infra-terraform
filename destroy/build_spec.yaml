@@ -1,0 +1,66 @@
+version: 0.1
+component: build
+timeoutInSeconds: 7200
+shell: bash
+failImmediatelyOnError: true
+
+env:
+  variables:
+    HTTP_PROXY: http://192.168.16.162:80
+    HTTPS_PROXY: http://192.168.16.162:80
+    NO_PROXY: localhost,127.0.0.1,.oraclecloud.com,.ocir.io
+  vaultVariables:
+    OCI_FINGERPRINT: "ocid1.vaultsecret.oc1.iad.amaaaaaagwh32gqawnotfizj6nhasg4boaq55tryr3tzys3nfx62o5nst4sq"
+    OCI_PRIVATE_KEY: "ocid1.vaultsecret.oc1.iad.amaaaaaagwh32gqa2pghqnzv7lbym7ezuvas3xye2bnznsh7apkkzulwykva"
+    OCI_DB_PASSWORD: "ocid1.vaultsecret.oc1.iad.amaaaaaagwh32gqamwbtskhqntouly6c6hsvgqluam6j3g4f4ldbmkzjrsqa"
+
+steps:
+  - type: Command
+    name: "Installing Terraform"
+    command: |
+      oci os object get --bucket-name dbe-manual-artifacts --name terraform_1.12.2_linux_amd64.zip --file terraform.zip
+      unzip terraform.zip
+      mv terraform /usr/local/bin/
+
+  - type: Command
+    name: "Configure OCI CLI"
+    command: |
+      mkdir -p ~/.oci
+      echo "${OCI_FINGERPRINT}" | base64 -d > ~/.oci/config
+      echo "$OCI_PRIVATE_KEY" | base64 -d > ~/.oci/oci_api_key.pem
+      chmod 600 ~/.oci/config
+      chmod 600 ~/.oci/oci_api_key.pem
+      cat ~/.oci/config
+      cat ~/.oci/oci_api_key.pem
+
+  - type: Command
+    name: "Terraform Initialization"
+    command: |
+      # export TF_CLI_CONFIG_FILE=${OCI_PRIMARY_SOURCE_DIR}/terraform.rc
+      cd ${OCI_PRIMARY_SOURCE_DIR}/environment/development
+      export TF_VAR_env_name=${env_name}
+      export TF_VAR_availability_domain=${availability_domain}
+      export TF_VAR_private_subnet_cidr=${private_subnet_cidr}
+      export TF_VAR_db_ad=${db_ad}
+      export TF_VAR_db_admin_password=${OCI_DB_PASSWORD}
+      export TF_VAR_pdb_admin_password=${OCI_DB_PASSWORD}
+      export TF_VAR_tde_wallet_password=${OCI_DB_PASSWORD}
+      terraform init -input=false -backend-config="bucket=dbe-manual-deployment-terraform-state" -backend-config="namespace=idclunvjezp6" -backend-config="region=us-ashburn-1" -backend-config="key=${env_name}/infra.tfstate"
+
+  - type: Command
+    name: "delete objects from bucket"
+    command: |
+      oci os object bulk-delete --namespace-name idclunvjezp6 --bucket-name ${env_name}-bucket --force
+
+  - type: Command
+    name: "Terraform Destroy"
+    command: |
+      cd ${OCI_PRIMARY_SOURCE_DIR}/environment/development
+      export TF_VAR_env_name=${env_name}
+      export TF_VAR_availability_domain=${availability_domain}
+      export TF_VAR_private_subnet_cidr=${private_subnet_cidr}
+      export TF_VAR_db_ad=${db_ad}
+      export TF_VAR_db_admin_password=${OCI_DB_PASSWORD}
+      export TF_VAR_pdb_admin_password=${OCI_DB_PASSWORD}
+      export TF_VAR_tde_wallet_password=${OCI_DB_PASSWORD}
+      terraform destroy -auto-approve -input=false

@@ -9,6 +9,14 @@ resource "oci_containerengine_node_pool" "oke_nodepool" {
       availability_domain = data.oci_identity_availability_domains.ads.availability_domains[0].name
       subnet_id           = var.private_subnet_id
     }
+    placement_configs {
+      availability_domain = data.oci_identity_availability_domains.ads.availability_domains[1].name
+      subnet_id           = var.private_subnet_id
+    }
+    placement_configs {
+      availability_domain = data.oci_identity_availability_domains.ads.availability_domains[2].name
+      subnet_id           = var.private_subnet_id
+    }
     size = var.node_size
     node_pool_pod_network_option_details {
     cni_type = "OCI_VCN_IP_NATIVE"
@@ -37,14 +45,30 @@ resource "tls_private_key" "bastion_key" {
 
 resource "local_file" "bastion_private_key" {
   content              = tls_private_key.bastion_key.private_key_pem
-  filename             = "../../environment/${var.env_name}/ssh-keys/oke-bastion-key.pem"
+  filename             = "../../oke-bastion-key.pem"
   file_permission      = "0600"
   directory_permission = "0700"
 }
 
 resource "local_file" "bastion_public_key" {
   content              = tls_private_key.bastion_key.public_key_openssh
-  filename             = "../../environment/${var.env_name}/ssh-keys/oke-bastion-key.pub"
+  filename             = "../../oke-bastion-key.pub"
   file_permission      = "0644"
   directory_permission = "0700"
 }
+# resource "null_resource" "upload_public_key" {
+#   triggers = {
+#     env_name      = var.env_name
+#     bucket_name   = "${var.env_name}-ssh-keys-bucket"
+#     namespace     = data.oci_objectstorage_namespace.ns.namespace
+#   }
+
+#   provisioner "local-exec" {
+#     command = "oci os object put --bucket-name ${self.triggers.bucket_name} --file oke-bastion-key.pem --name ${self.triggers.env_name}-oke-bastion-key.pem --namespace ${self.triggers.namespace}"
+#   }
+
+#   provisioner "local-exec" {
+#     when    = destroy
+#     command = "oci os object delete --bucket-name ${self.triggers.bucket_name} --name ${self.triggers.env_name}-oke-bastion-key.pem --namespace ${self.triggers.namespace} --force"
+#   }
+# }

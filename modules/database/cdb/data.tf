@@ -1,3 +1,4 @@
 data "oci_identity_availability_domains" "ads" {
   compartment_id = var.root_compartment_id
 }
+data "oci_objectstorage_namespace" "ns" {}

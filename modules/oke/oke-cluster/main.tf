@@ -22,4 +22,5 @@ resource "oci_containerengine_cluster" "oke_cluster" {
   }
 
   type = var.type
+
 }
